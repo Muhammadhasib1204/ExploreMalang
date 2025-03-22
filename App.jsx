@@ -1,67 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, Image, TextInput, Pressable, Modal, Button, StatusBar, TouchableOpacity } from 'react-native';
 import { SearchNormal } from 'iconsax-react-native';
 import { fontType, colors } from './src/theme'; 
-
-const blogList = [
-  {
-    id: 1,
-    title: 'Gunung Bromo',
-    description: 'Gunung Bromo adalah gunung berapi aktif yang terkenal dengan pemandangan matahari terbit yang spektakuler. Wisatawan bisa menikmati pemandangan indah dengan kendaraan 4WD atau berjalan kaki.',
-    image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVlIWuFFcbZciydI-PYVwHmh3h9xWLI9rvRQ&s' },
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    title: 'Taman Rekreasi Selecta',
-    description: 'Taman Rekreasi Selecta menawarkan suasana alam yang sejuk dengan wahana kolam renang air panas dan taman bunga yang indah. Pemandangan pegunungan juga menambah kenyamanan.',
-    image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOITNHzuAriRH478_KVQOZHt3DOuw61Q9k8Q&s' },
-    rating: 4.5,
-  },
-  {
-    id: 3,
-    title: 'Jatim Park 2',
-    description: 'Jatim Park 2 adalah taman hiburan dan edukasi yang memiliki wahana seperti Predator Fun Park dan Batu Secret Zoo. Tempat ini cocok untuk liburan keluarga sambil belajar tentang satwa.',
-    image: { uri: 'https://bromomalangtour.com/wp-content/uploads/2013/06/jatim-park-2.jpg' },
-    rating: 4.7,
-  },
-  {
-    id: 4,
-    title: 'Candi Singosari',
-    description: 'Candi Singosari adalah situs sejarah peninggalan Kerajaan Singosari yang memiliki arsitektur indah dan relief-relief yang menggambarkan kejayaan kerajaan Jawa Timur.',
-    image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Candi_Singosari_B.JPG' },
-    rating: 4.3,
-  },
-  {
-    id: 5,
-    title: 'Pantai Balekambang',
-    description: 'Pantai Balekambang menawarkan pemandangan indah dengan pasir putih dan batu karang yang menakjubkan. Pantai ini juga dikenal dengan adanya pura yang berada di tengah laut.',
-    image: { uri: 'https://nagantour.com/wp-content/uploads/2023/12/pantai-balekambang-1.webp' },
-    rating: 4.6,
-  },
-  {
-    id: 7,
-    title: 'Museum Angkut',
-    description: 'Museum Angkut menyimpan koleksi berbagai kendaraan dari seluruh dunia, mulai dari mobil antik hingga kendaraan modern. Tempat ini memberikan pengalaman belajar yang menyenangkan.',
-    image: { uri: 'https://osccdn.medcom.id/images/content/2021/12/29/c1ac85317e780cbd31f4b5e1b30b562f.jpg' },
-    rating: 4.7,
-  },
-  
-];
-
-const carouselImages = [
-  { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRupoVN9oKhIcstb0H1BTYwZvcIRBoa3GV8oQ&s' },
-  { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Tugu_Malang.jpg/800px-Tugu_Malang.jpg' },
-  { uri: 'https://kabarmalang.com/wp-content/uploads/2024/09/IMG_20240904_170706.jpg' },
-];
+import { destinations, carouselImages } from './component/destinasi'; 
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const carouselRef = useRef(null); 
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category); 
+    setSelectedCategory(category);
   };
+
   const handlePlaceClick = (place) => {
     setSelectedPlace(place);
     setModalVisible(true);
@@ -81,100 +35,121 @@ export default function App() {
       stars.push('★');
     }
     if (halfStar) {
-      stars.push('☆'); 
+      stars.push('☆');
     }
-    return stars.join(' '); 
+    return stars.join(' ');
   };
+
+ 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % carouselImages.length;
+      setCurrentIndex(nextIndex); 
+
+      if (carouselRef.current) {
+        carouselRef.current.scrollTo({ x: nextIndex * 300, animated: true }); 
+      }
+    }, 3000); 
+
+    return () => clearInterval(intervalId); 
+  }, [currentIndex]);
+
+  const filteredDestinations = destinations.filter((place) =>
+    place.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    place.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
       
       <View style={styles.header}>
-  <Image
-    source={require('./src/logo/newlogo.png')}  
-    style={styles.logo}
-  />
-  <View style={styles.searchBarContainer}>
-    <TextInput
-      style={styles.input}
-      placeholder="Cari Destinasi"
-    />
-    <Pressable style={styles.button}>
-      <SearchNormal size={20} color={colors.white()} />
-    </Pressable>
-  </View>
-</View>
+        <Image source={require('./src/logo/newlogo.png')} style={styles.logo} />
+        <View style={styles.searchBarContainer}>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Cari Destinasi" 
+            value={searchQuery} 
+            onChangeText={(text) => setSearchQuery(text)} 
+          />
+          <Pressable style={styles.button}>
+            <SearchNormal size={20} color={colors.white()} />
+          </Pressable>
+        </View>
+      </View>
 
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.carousel}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.carousel}
+        ref={carouselRef}
+        scrollEventThrottle={16}
+      >
         {carouselImages.map((image, index) => (
-          <Image key={index} source={image} style={styles.carouselImage} />
+          <Image 
+            key={index} 
+            source={image} 
+            style={styles.carouselImage} 
+          />
         ))}
       </ScrollView>
 
-      
       <View style={styles.listCategory}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <TouchableOpacity 
-          style={[category.item, selectedCategory === 'Destinasi Alam' && category.selectedItem]} 
-          onPress={() => handleCategorySelect('Destinasi Alam')}
-        >
-          <Text style={[category.title, selectedCategory === 'Destinasi Alam' && category.selectedTitle]}>
-            Destinasi Alam
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[category.item, selectedCategory === 'Pantai' && category.selectedItem]} 
-          onPress={() => handleCategorySelect('Pantai')}
-        >
-          <Text style={[category.title, selectedCategory === 'Pantai' && category.selectedTitle]}>
-            Pantai
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[category.item, selectedCategory === 'Gunung & Pendakian' && category.selectedItem]} 
-          onPress={() => handleCategorySelect('Gunung & Pendakian')}
-        >
-          <Text style={[category.title, selectedCategory === 'Gunung & Pendakian' && category.selectedTitle]}>
-            Gunung & Pendakian
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[category.item, selectedCategory === 'Wisata Budaya' && category.selectedItem]} 
-          onPress={() => handleCategorySelect('Wisata Budaya')}
-        >
-          <Text style={[category.title, selectedCategory === 'Wisata Budaya' && category.selectedTitle]}>
-            Wisata Budaya
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[category.item, selectedCategory === 'Taman Hiburan' && category.selectedItem]} 
-          onPress={() => handleCategorySelect('Taman Hiburan')}
-        >
-          <Text style={[category.title, selectedCategory === 'Taman Hiburan' && category.selectedTitle]}>
-            Taman Hiburan
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[category.item, selectedCategory === 'Wisata Keluarga' && category.selectedItem]} 
-          onPress={() => handleCategorySelect('Wisata Keluarga')}
-        >
-          <Text style={[category.title, selectedCategory === 'Wisata Keluarga' && category.selectedTitle]}>
-            Wisata Keluarga
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-
-      
-      <ScrollView style={styles.listBlog}>
-        {blogList.map((place) => (
-          <Pressable
-            key={place.id}
-            style={styles.blogItem}
-            onPress={() => handlePlaceClick(place)}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity 
+            style={[category.item, selectedCategory === 'Destinasi Alam' && category.selectedItem]} 
+            onPress={() => handleCategorySelect('Destinasi Alam')}
           >
+            <Text style={[category.title, selectedCategory === 'Destinasi Alam' && category.selectedTitle]} >
+              Destinasi Alam
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[category.item, selectedCategory === 'Pantai' && category.selectedItem]} 
+            onPress={() => handleCategorySelect('Pantai')}
+          >
+            <Text style={[category.title, selectedCategory === 'Pantai' && category.selectedTitle]}>
+              Pantai
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[category.item, selectedCategory === 'Gunung & Pendakian' && category.selectedItem]} 
+            onPress={() => handleCategorySelect('Gunung & Pendakian')}
+          >
+            <Text style={[category.title, selectedCategory === 'Gunung & Pendakian' && category.selectedTitle]}>
+              Gunung & Pendakian
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[category.item, selectedCategory === 'Wisata Budaya' && category.selectedItem]} 
+            onPress={() => handleCategorySelect('Wisata Budaya')}
+          >
+            <Text style={[category.title, selectedCategory === 'Wisata Budaya' && category.selectedTitle]}>
+              Wisata Budaya
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[category.item, selectedCategory === 'Taman Hiburan' && category.selectedItem]} 
+            onPress={() => handleCategorySelect('Taman Hiburan')}
+          >
+            <Text style={[category.title, selectedCategory === 'Taman Hiburan' && category.selectedTitle]}>
+              Taman Hiburan
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[category.item, selectedCategory === 'Wisata Keluarga' && category.selectedItem]} 
+            onPress={() => handleCategorySelect('Wisata Keluarga')}
+          >
+            <Text style={[category.title, selectedCategory === 'Wisata Keluarga' && category.selectedTitle]}>
+              Wisata Keluarga
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+
+      <ScrollView style={styles.listBlog}>
+        {filteredDestinations.map((place) => (
+          <Pressable key={place.id} style={styles.blogItem} onPress={() => handlePlaceClick(place)}>
             <Image source={place.image} style={styles.blogImage} />
             <View style={styles.blogContent}>
               <Text style={styles.blogTitle}>{place.title}</Text>
@@ -185,13 +160,7 @@ export default function App() {
         ))}
       </ScrollView>
 
-      
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
+      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {selectedPlace && (
@@ -200,12 +169,7 @@ export default function App() {
                 <Text style={styles.modalTitle}>{selectedPlace.title}</Text>
                 <Text style={styles.modalDescription}>{selectedPlace.description}</Text>
                 <Text style={styles.modalRating}>{renderRating(selectedPlace.rating)}</Text>
-                <Button
-                  title="Close"
-                  onPress={closeModal}
-                  color="#7A4B29"
-                  style={styles.modalButton}
-                />
+                <Button title="Close" onPress={closeModal} color="#7A4B29" style={styles.modalButton} />
               </>
             )}
           </View>
@@ -220,6 +184,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white(),
   },
+  innerContainer: {
+    flex: 1,
+  },
   header: {
     paddingHorizontal: 24,
     justifyContent: 'space-between',
@@ -233,7 +200,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 130,
     height: 130,
-    marginBottom : 10,
+    marginBottom: 10,
     resizeMode: 'contain',
   },
   searchBarContainer: {
@@ -270,11 +237,11 @@ const styles = StyleSheet.create({
   listCategory: {
     marginTop: -15,
     paddingVertical: 10,
-    marginBottom : 10,
+    marginBottom: 10,
   },
   carousel: {
     marginBottom: 15,  
-  paddingBottom: 110, 
+    paddingBottom: 110, 
   },
   carouselImage: {
     width: 300, 
@@ -311,7 +278,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.grey(),
     marginTop: 5,
-    numberOfLines: 3, 
   },
   blogRating: {
     fontSize: 14,
@@ -350,7 +316,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.gold(),
     marginTop: 10,
-    marginBottom : 10,
+    marginBottom: 10,
   },
   modalButton: {
     marginTop: 20,
@@ -358,9 +324,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
   }
-  
 });
-
 const category = StyleSheet.create({
   item: {
     paddingHorizontal: 14,
