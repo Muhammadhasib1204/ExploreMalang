@@ -1,5 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Home as HomeIcon, SearchNormal, Heart, User } from 'iconsax-react-native'; 
+import { colors, fontType } from '../../theme'; 
+
 
 const favoritePlaces = [
   {
@@ -33,6 +37,7 @@ const favoritePlaces = [
 ];
 
 const FavoriteScreen = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Favorit Anda</Text>
@@ -50,6 +55,29 @@ const FavoriteScreen = () => {
           </View>
         )}
       />
+
+      {/* Navbar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('Home')}>
+          <HomeIcon size={24} color={colors.grey()} />
+          <Text style={styles.tabTitle}>Home</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('Pencarian')}>
+          <SearchNormal size={24} color={colors.grey()} />
+          <Text style={styles.tabTitle}>Search</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('Favorite')}>
+          <Heart size={24} color={colors.blue()} />
+          <Text style={[styles.tabTitle, styles.tabTitleActive]}>Favorite</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('Profile')}>
+          <User size={24} color={colors.grey()} />
+          <Text style={styles.tabTitle}>Profile</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -66,6 +94,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 12,
+    marginTop: 30,
   },
   card: {
     flexDirection: 'row',
@@ -99,5 +128,29 @@ const styles = StyleSheet.create({
   rating: {
     fontSize: 13,
     color: '#888',
+  },
+
+  bottomBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: colors.white(),
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.grey(0.3),
+  },
+  tabButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabTitle: {
+    fontSize: 12,
+    fontFamily: fontType['Pjs-Regular'],
+    color: colors.grey(),
+    marginTop: 4,
+  },
+  tabTitleActive: {
+    color: colors.blue(),
+    fontFamily: fontType['Pjs-Medium'],
   },
 });
