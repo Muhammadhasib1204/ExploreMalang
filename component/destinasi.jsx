@@ -48,4 +48,5 @@ export const destinations = [
     { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Tugu_Malang.jpg/800px-Tugu_Malang.jpg' },
     { uri: 'https://kabarmalang.com/wp-content/uploads/2024/09/IMG_20240904_170706.jpg' },
   ];
+
   
