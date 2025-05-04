@@ -10,8 +10,8 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentTab, setCurrentTab] = useState('Home')
+  const [searchQuery] = useState('');
+  const [currentTab] = useState('Home')
   const carouselRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 

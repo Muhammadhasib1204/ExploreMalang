@@ -1,36 +1,35 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, Animated, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Home as HomeIcon, SearchNormal, Heart, User } from 'iconsax-react-native'; 
-import { colors, fontType } from '../../theme'; 
-
+import { Home as HomeIcon, SearchNormal, Heart, User } from 'iconsax-react-native';
+import { colors, fontType } from '../../theme';
 
 const favoritePlaces = [
   {
     id: 1,
     title: 'Gunung Bromo',
-    description: 'Gunung Bromo adalah gunung berapi aktif yang terkenal dengan pemandangan matahari terbit yang spektakuler. Wisatawan bisa menikmati pemandangan indah dengan kendaraan 4WD atau berjalan kaki.',
+    description: 'Gunung Bromo adalah gunung berapi aktif yang terkenal dengan pemandangan matahari terbit yang spektakuler...',
     image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVlIWuFFcbZciydI-PYVwHmh3h9xWLI9rvRQ&s' },
     rating: 4.8,
   },
   {
     id: 2,
     title: 'Taman Rekreasi Selecta',
-    description: 'Taman Rekreasi Selecta menawarkan suasana alam yang sejuk dengan wahana kolam renang air panas dan taman bunga yang indah. Pemandangan pegunungan juga menambah kenyamanan.',
+    description: 'Taman Rekreasi Selecta menawarkan suasana alam yang sejuk dengan wahana kolam renang dan taman bunga...',
     image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOITNHzuAriRH478_KVQOZHt3DOuw61Q9k8Q&s' },
     rating: 4.5,
   },
   {
     id: 3,
     title: 'Jatim Park 2',
-    description: 'Jatim Park 2 adalah taman hiburan dan edukasi yang memiliki wahana seperti Predator Fun Park dan Batu Secret Zoo. Tempat ini cocok untuk liburan keluarga sambil belajar tentang satwa.',
+    description: 'Jatim Park 2 adalah taman hiburan dan edukasi yang memiliki wahana seperti Batu Secret Zoo...',
     image: { uri: 'https://bromomalangtour.com/wp-content/uploads/2013/06/jatim-park-2.jpg' },
     rating: 4.7,
   },
   {
     id: 4,
     title: 'Candi Singosari',
-    description: 'Candi Singosari adalah situs sejarah peninggalan Kerajaan Singosari yang memiliki arsitektur indah dan relief-relief yang menggambarkan kejayaan kerajaan Jawa Timur.',
+    description: 'Candi Singosari adalah situs sejarah peninggalan Kerajaan Singosari dengan arsitektur dan relief khas...',
     image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Candi_Singosari_B.JPG' },
     rating: 4.3,
   },
@@ -38,21 +37,50 @@ const favoritePlaces = [
 
 const FavoriteScreen = () => {
   const navigation = useNavigation();
+  const animatedValues = useRef(favoritePlaces.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    Animated.stagger(150,
+      animatedValues.map((anim) =>
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        })
+      )
+    ).start();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Favorit Anda</Text>
-      <FlatList
+      <Animated.FlatList
         data={favoritePlaces}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.image} style={styles.image} />
-            <View style={styles.textContainer}>
-              <Text style={styles.name}>{item.title}</Text>
-              <Text style={styles.description}>{item.description}</Text>
-              <Text style={styles.rating}>⭐ {item.rating}</Text>
+        contentContainerStyle={{ paddingBottom: 80 }}
+        renderItem={({ item, index }) => (
+          <Animated.View
+            style={{
+              opacity: animatedValues[index],
+              transform: [
+                {
+                  translateY: animatedValues[index].interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                },
+              ],
+            }}
+          >
+            <View style={styles.card}>
+              <Image source={item.image} style={styles.image} />
+              <View style={styles.textContainer}>
+                <Text style={styles.name}>{item.title}</Text>
+                <Text style={styles.description}>{item.description}</Text>
+                <Text style={styles.rating}>⭐ {item.rating}</Text>
+              </View>
             </View>
-          </View>
+          </Animated.View>
         )}
       />
 
@@ -129,7 +157,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#888',
   },
-
   bottomBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -138,6 +165,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: colors.grey(0.3),
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
   },
   tabButton: {
     alignItems: 'center',
