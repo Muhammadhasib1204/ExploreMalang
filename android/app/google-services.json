@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754427713039",
+    "project_id": "exploremalang-e2244",
+    "storage_bucket": "exploremalang-e2244.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754427713039:android:b52035dde7df23a4db357a",
+        "android_client_info": {
+          "package_name": "com.exploremalang"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA16pnAK7X0ZuO9ZI4x12is6UMt4fE9Vus"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
