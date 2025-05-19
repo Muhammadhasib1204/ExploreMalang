@@ -11,11 +11,18 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import {Home as HomeIcon, Add} from 'iconsax-react-native';
-import {fontType} from '../../theme';
+import {
+  SearchNormal,
+  Heart,
+  User,
+  Home as HomeIcon,
+  Add,
+} from 'iconsax-react-native';
+import {colors, fontType} from '../../theme';
 import {useNavigation} from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
 import firestore from '@react-native-firebase/firestore';
+import notifee, {AndroidImportance} from '@notifee/react-native';
 
 const brownTheme = {
   primary: '#8B4513',
@@ -124,6 +131,28 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleNotification = async () => {
+    await notifee.requestPermission();
+
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
+    });
+
+    await notifee.displayNotification({
+      title: 'Berhasil!',
+      body: 'Review berhasil diupload',
+      android: {
+        channelId,
+        smallIcon: 'ic_launcher',
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+  };
+
   const handleSavePost = async () => {
     if (!postForm.title || !image || !postForm.description) {
       Alert.alert('Validasi', 'Judul, gambar, dan deskripsi harus diisi!');
@@ -150,6 +179,7 @@ const ProfileScreen = () => {
       } else {
         await firestore().collection('posts').add(newPost);
       }
+      await handleNotification();
 
       fetchPosts();
       setFormVisible(false);
@@ -235,6 +265,7 @@ const ProfileScreen = () => {
             User
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[
             styles.tabButtonTop,
@@ -250,7 +281,6 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
-
       {selectedTab === 'User' ? (
         <ScrollView contentContainerStyle={styles.container}>
           <Image
@@ -304,6 +334,7 @@ const ProfileScreen = () => {
                 onChangeText={text => setPostForm({...postForm, title: text})}
                 style={styles.input}
               />
+
               <TouchableOpacity
                 style={styles.imagePickerButton}
                 onPress={handleImagePick}>
@@ -312,12 +343,13 @@ const ProfileScreen = () => {
                 </Text>
               </TouchableOpacity>
 
-              {image ? (
+              {image && (
                 <Image
                   source={{uri: image}}
                   style={{height: 100, marginVertical: 8}}
                 />
-              ) : null}
+              )}
+
               <TextInput
                 placeholder="Deskripsi"
                 value={postForm.description}
@@ -328,6 +360,7 @@ const ProfileScreen = () => {
                 numberOfLines={4}
                 style={[styles.input, {height: 80}]}
               />
+
               <View
                 style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                 <TouchableOpacity
@@ -339,6 +372,7 @@ const ProfileScreen = () => {
                   }}>
                   <Text style={{color: 'red'}}>Batal</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity onPress={handleSavePost}>
                   <Text style={{color: brownTheme.primary}}>Simpan</Text>
                 </TouchableOpacity>
@@ -357,6 +391,35 @@ const ProfileScreen = () => {
           )}
         </View>
       )}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('Home')}>
+          <HomeIcon size={24} color={colors.blue()} />
+          <Text style={[styles.tabTitle, styles.tabTitleActive]}>Home</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('Pencarian')}>
+          <SearchNormal size={24} color={colors.grey()} />
+          <Text style={styles.tabTitle}>Search</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('Favorite')}>
+          <Heart size={24} color={colors.grey()} />
+          <Text style={styles.tabTitle}>Favorite</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('Profile')}>
+          <User size={24} color={colors.grey()} />
+          <Text style={styles.tabTitle}>Profile</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
